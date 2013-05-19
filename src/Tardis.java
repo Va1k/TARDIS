@@ -21,8 +21,8 @@ public class Tardis extends Applet implements Runnable{
     private Choice lCities = new Choice();
     private Label description = new Label("");
     private City selectedCity;
-    private String normalDate = "420";
-    private String militaryDate;
+    private String normalDate = "";
+    private String militaryDate = "";
     private Thread animator;
 
     public void init() {
@@ -33,9 +33,12 @@ public class Tardis extends Applet implements Runnable{
         controls.add(lCountries,BorderLayout.NORTH);
         controls.add(lCities,BorderLayout.CENTER);
         controls.add(description,BorderLayout.SOUTH);
+        controls.setBackground(Color.decode("#DFDFDF"));
         add(controls, BorderLayout.NORTH);
 
-        controls.setBackground(Color.gray);
+        Label userTimeZone = new Label ("Your time zone: " + TimeZone.getDefault().getDisplayName() + " | " + TimeZone.getDefault().getID());
+        userTimeZone.setForeground(Color.gray);
+        add(userTimeZone, BorderLayout.SOUTH);
 
         getCountries();
 
@@ -87,10 +90,18 @@ public class Tardis extends Applet implements Runnable{
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 
         // Make some fonts
-        Font normal = new Font("Trebuchet MS",Font.PLAIN, 40);
+        Font header = new Font("Trebuchet MS",Font.PLAIN, 35);
+        Font normal = new Font("Trebuchet MS",Font.PLAIN, 30);
 
+        if(selectedCity == null) {
+            return;
+        }
+
+        g2.setFont(header);
+        g2.drawString(selectedCity.getCountry() + ", " + selectedCity.getName(),10, 110);
         g2.setFont(normal);
-        g2.drawString(normalDate, 150, 120);
+        g2.drawString(normalDate, 50, 150);
+        g2.drawString(militaryDate, 50, 190);
     }
 
     public void readDatabase() {
@@ -100,7 +111,7 @@ public class Tardis extends Applet implements Runnable{
          */
         CSVReader csvReader = null;
         try {
-            csvReader = new CSVReader(new FileReader(database.getFile()));
+            csvReader = new CSVReader(new FileReader(database.getPath()));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
