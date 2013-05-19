@@ -14,13 +14,16 @@ import java.util.*;
  * Time  : 2:37 PM
  */
 
-public class Tardis extends Applet {
+public class Tardis extends Applet implements Runnable{
 
     private ArrayList<City> cities = new ArrayList<City>();
     private Choice lCountries = new Choice();
     private Choice lCities = new Choice();
     private Label description = new Label("");
     private City selectedCity;
+    private String normalDate = "420";
+    private String militaryDate;
+    private Thread animator;
 
     public void init() {
         setLayout(new BorderLayout());
@@ -31,6 +34,8 @@ public class Tardis extends Applet {
         controls.add(lCities,BorderLayout.CENTER);
         controls.add(description,BorderLayout.SOUTH);
         add(controls, BorderLayout.NORTH);
+
+        controls.setBackground(Color.gray);
 
         getCountries();
 
@@ -46,18 +51,46 @@ public class Tardis extends Applet {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
                 getCity();
-                description.setText(selectedCity.getComment());
-                convertTime();
             }
         });
+    }
 
+    public void start() {
+        if (animator == null) {
+            animator = new Thread(this);
+            animator.start();
+        }
+    }
 
+    public void stop() {
+        if (animator != null) {
+            animator = null;
+        }
+    }
+
+    public void run() {
+        while(animator.isAlive()) {
+            if(selectedCity != null) {
+                normalDate = selectedCity.convertTime()[0];
+                militaryDate = selectedCity.convertTime()[1];
+                description.setText(selectedCity.getComment());
+                repaint();
+            }
+
+            try {Thread.sleep(250);} catch (InterruptedException e) {}
+        }
     }
 
     public void paint(Graphics g) {
         // No more fuzzy text! Anti-aliasing on!
         Graphics2D g2 = (Graphics2D)g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Make some fonts
+        Font normal = new Font("Trebuchet MS",Font.PLAIN, 40);
+
+        g2.setFont(normal);
+        g2.drawString(normalDate, 150, 120);
     }
 
     public void readDatabase() {
@@ -89,7 +122,7 @@ public class Tardis extends Applet {
         }
 
         /**
-         * We don't need the csvReader anymore, closes it.
+         * We don't need the csvReader anymore, close it.
          */
         try {
             csvReader.close();
@@ -119,14 +152,8 @@ public class Tardis extends Applet {
 
     public void getCity() {
         for (City s : cities)
-            if (s.getName() == lCities.getSelectedItem())
+            if (s.getName().equals(lCities.getSelectedItem()))
                 selectedCity = s;
     } // End of getCities()
 
-    public void convertTime() {
-        System.out.println("Timezone Detected:\t\t\t" + TimeZone.getDefault());
-
-        System.out.println(selectedCity.getCountry() + ", " + selectedCity.getName() + "'s " +  "Timezone:\t\t\t" + selectedCity.getTimezone());
-
-    }
 }

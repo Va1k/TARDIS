@@ -1,3 +1,6 @@
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 /**
@@ -35,5 +38,21 @@ public class City {
     public TimeZone getTimezone() {
         return this.timezone;
     }
+
+    public String[] convertTime() {
+        // Finds out what the current time/date is.
+        Date currentTime = new Date();
+
+        // Creates a date format
+        DateFormat normal = new SimpleDateFormat("dd-MMMM-yyyy hh:mm:ssa");
+        DateFormat military = new SimpleDateFormat("dd-MMMM-yyyy HH:mm:ss");
+        normal.setTimeZone(this.timezone);
+        military.setTimeZone(this.timezone);
+
+        // Formats the date in the currently selected city's timezone
+        // Also returns both the normal & military formatted times in an array.
+        return new String[]{normal.format(currentTime), military.format(currentTime)};
+    }
+
 
 }
