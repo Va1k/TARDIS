@@ -2,12 +2,10 @@ import au.com.bytecode.opencsv.CSVReader;
 
 import java.applet.Applet;
 import java.awt.*;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.awt.event.*;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,18 +16,40 @@ import java.util.TimeZone;
 
 public class Tardis extends Applet {
 
+    private ArrayList<City> cities = new ArrayList<City>();
+    private Choice lCountries = new Choice();
+    private Choice lCities = new Choice();
+    private Label description = new Label("");
+    private City selectedCity;
+
     public void init() {
         setLayout(new BorderLayout());
         readDatabase();
 
-        Choice lCountries = new Choice();
-        Choice lCities = new Choice();
-
         Panel controls = new Panel(new BorderLayout());
         controls.add(lCountries,BorderLayout.NORTH);
-        controls.add(lCities,BorderLayout.SOUTH);
-        add(controls,BorderLayout.NORTH);
+        controls.add(lCities,BorderLayout.CENTER);
+        controls.add(description,BorderLayout.SOUTH);
+        add(controls, BorderLayout.NORTH);
 
+        getCountries();
+
+        lCountries.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent itemEvent) {
+                getCities();
+                description.setText("");
+            }
+        });
+
+        lCities.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent itemEvent) {
+                getCity();
+                description.setText(selectedCity.getComment());
+                convertTime();
+            }
+        });
 
 
     }
@@ -60,7 +80,6 @@ public class Tardis extends Applet {
          * Now that we effectively have an array full of cities and their details the rest is pretty simple.
          */
         String[] row;
-        ArrayList<City> cities = new ArrayList<City>();
         try {
             while((row = csvReader.readNext()) != null) {
                 cities.add(new City(row[0],row[1],row[2],TimeZone.getTimeZone(row[3])));
@@ -77,5 +96,37 @@ public class Tardis extends Applet {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    } // End of readDatabase()
+
+    public void getCountries() {
+        lCountries.add("Select an area!");
+        ArrayList<String> addedCountries = new ArrayList<String>();
+        for (City s : cities) {
+            if(!addedCountries.contains(s.getCountry())) {
+                lCountries.add(s.getCountry());
+                addedCountries.add(s.getCountry());
+            }
+        }
+    } // End of getCountries()
+
+    public void getCities() {
+        lCities.removeAll();
+        lCities.add("Select a city!");
+        for (City s : cities)
+            if (s.getCountry().equals(lCountries.getSelectedItem()))
+                lCities.add(s.getName());
+    } // End of getCities()
+
+    public void getCity() {
+        for (City s : cities)
+            if (s.getName() == lCities.getSelectedItem())
+                selectedCity = s;
+    } // End of getCities()
+
+    public void convertTime() {
+        System.out.println("Timezone Detected:\t\t\t" + TimeZone.getDefault());
+
+        System.out.println(selectedCity.getCountry() + ", " + selectedCity.getName() + "'s " +  "Timezone:\t\t\t" + selectedCity.getTimezone());
+
     }
 }
