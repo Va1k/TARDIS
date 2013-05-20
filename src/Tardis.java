@@ -17,12 +17,12 @@ import java.util.*;
 public class Tardis extends Applet implements Runnable{
 
     private ArrayList<City> cities = new ArrayList<City>();
-    private Choice lCountries = new Choice();
-    private Choice lCities = new Choice();
-    private Label description = new Label("");
+    private Choice comboRegion = new Choice();
+    private Choice comboLocation = new Choice();
     private City selectedCity;
-    private String normalDate = "";
-    private String militaryDate = "";
+    private String normalTime = "";
+    private String militaryTime = "";
+    private String date = "";
     private Thread animator;
 
     public void init() {
@@ -30,27 +30,28 @@ public class Tardis extends Applet implements Runnable{
         readDatabase();
 
         Panel controls = new Panel(new BorderLayout());
-        controls.add(lCountries,BorderLayout.NORTH);
-        controls.add(lCities,BorderLayout.CENTER);
-        controls.add(description,BorderLayout.SOUTH);
-        controls.setBackground(Color.decode("#DFDFDF"));
+        controls.setBackground(Color.decode("#FAFAFA"));
+        controls.add(comboRegion, BorderLayout.NORTH);
+        controls.add(comboLocation,BorderLayout.CENTER);
         add(controls, BorderLayout.NORTH);
 
-        Label userTimeZone = new Label ("Your time zone: " + TimeZone.getDefault().getDisplayName() + " | " + TimeZone.getDefault().getID());
+        Label userTimeZone = new Label (" Your time zone: " + TimeZone.getDefault().getDisplayName() + " | " + TimeZone.getDefault().getID());
         userTimeZone.setForeground(Color.gray);
         add(userTimeZone, BorderLayout.SOUTH);
 
+        Button info = new Button("?");
+        controls.add(info, BorderLayout.EAST);
+
         getCountries();
 
-        lCountries.addItemListener(new ItemListener() {
+        comboRegion.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
                 getCities();
-                description.setText("");
             }
         });
 
-        lCities.addItemListener(new ItemListener() {
+        comboLocation.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
                 getCity();
@@ -74,9 +75,9 @@ public class Tardis extends Applet implements Runnable{
     public void run() {
         while(animator.isAlive()) {
             if(selectedCity != null) {
-                normalDate = selectedCity.convertTime()[0];
-                militaryDate = selectedCity.convertTime()[1];
-                description.setText(selectedCity.getComment());
+                date = selectedCity.convertTime()[0];
+                normalTime = selectedCity.convertTime()[1];
+                militaryTime = selectedCity.convertTime()[2];
                 repaint();
             }
 
@@ -90,18 +91,28 @@ public class Tardis extends Applet implements Runnable{
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 
         // Make some fonts
-        Font header = new Font("Trebuchet MS",Font.PLAIN, 35);
-        Font normal = new Font("Trebuchet MS",Font.PLAIN, 30);
+        Font header = new Font("Trebuchet MS",Font.BOLD, 35);
+        Font normal = new Font("Trebuchet MS",Font.PLAIN, 25);
+        Font timezone = new Font("Trebuchet MS",Font.PLAIN,25);
 
         if(selectedCity == null) {
             return;
         }
 
         g2.setFont(header);
-        g2.drawString(selectedCity.getCountry() + ", " + selectedCity.getName(),10, 110);
+        g2.drawString(selectedCity.getCountry() + ", " + selectedCity.getName(), 10, 90);
+
+        g2.setFont(timezone);
+        g2.setColor(Color.decode("#AAAAAA"));
+        g2.drawString(selectedCity.getTimezone().getDisplayName(),10, 120);
+
         g2.setFont(normal);
-        g2.drawString(normalDate, 50, 150);
-        g2.drawString(militaryDate, 50, 190);
+        g2.setColor(Color.black);
+        g2.drawString(date,10,150);
+        g2.drawString(normalTime, 10, 180);
+        g2.setColor(Color.GRAY);
+        g2.drawString(militaryTime,10,210);
+
     }
 
     public void readDatabase() {
@@ -126,7 +137,7 @@ public class Tardis extends Applet implements Runnable{
         String[] row;
         try {
             while((row = csvReader.readNext()) != null) {
-                cities.add(new City(row[0],row[1],row[2],TimeZone.getTimeZone(row[3])));
+                cities.add(new City(row[0],row[1],TimeZone.getTimeZone(row[3])));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -143,27 +154,27 @@ public class Tardis extends Applet implements Runnable{
     } // End of readDatabase()
 
     public void getCountries() {
-        lCountries.add("Select an area!");
+        comboRegion.add("Select a region!");
         ArrayList<String> addedCountries = new ArrayList<String>();
         for (City s : cities) {
             if(!addedCountries.contains(s.getCountry())) {
-                lCountries.add(s.getCountry());
+                comboRegion.add(s.getCountry());
                 addedCountries.add(s.getCountry());
             }
         }
     } // End of getCountries()
 
     public void getCities() {
-        lCities.removeAll();
-        lCities.add("Select a city!");
+        comboLocation.removeAll();
+        comboLocation.add("");
         for (City s : cities)
-            if (s.getCountry().equals(lCountries.getSelectedItem()))
-                lCities.add(s.getName());
+            if (s.getCountry().equals(comboRegion.getSelectedItem()))
+                comboLocation.add(s.getName());
     } // End of getCities()
 
     public void getCity() {
         for (City s : cities)
-            if (s.getName().equals(lCities.getSelectedItem()))
+            if (s.getName().equals(comboLocation.getSelectedItem()))
                 selectedCity = s;
     } // End of getCities()
 

@@ -12,14 +12,12 @@ import java.util.TimeZone;
 public class City {
     private String country;
     private String name;
-    private String comment;
     private TimeZone timezone;
 
-    public City(String country, String name, String comment, TimeZone timezone) {
+    public City(String country, String name, TimeZone timezone) {
         //lel
         this.country = country;
         this.name = name;
-        this.comment = comment;
         this.timezone = timezone;
     }
 
@@ -31,10 +29,6 @@ public class City {
         return this.name;
     }
 
-    public String getComment() {
-        return this.comment;
-    }
-
     public TimeZone getTimezone() {
         return this.timezone;
     }
@@ -44,14 +38,15 @@ public class City {
         Date currentTime = new Date();
 
         // Creates a date format
-        DateFormat normal = new SimpleDateFormat("dd-MMMM-yyyy hh:mm:ssa");
-        DateFormat military = new SimpleDateFormat("dd-MMMM-yyyy HH:mm:ss");
+        DateFormat date = new SimpleDateFormat("dd, MMMM, yyyy");
+        DateFormat normal = new SimpleDateFormat("hh:mm:ssa");
+        DateFormat military = new SimpleDateFormat("HH:mm:ss");
         normal.setTimeZone(this.timezone);
         military.setTimeZone(this.timezone);
 
         // Formats the date in the currently selected city's timezone
         // Also returns both the normal & military formatted times in an array.
-        return new String[]{normal.format(currentTime), military.format(currentTime)};
+        return new String[]{date.format(currentTime), normal.format(currentTime), military.format(currentTime)};
     }
 
 
