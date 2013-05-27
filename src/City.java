@@ -41,6 +41,7 @@ public class City {
         DateFormat date = new SimpleDateFormat("dd, MMMM, yyyy");
         DateFormat normal = new SimpleDateFormat("hh:mm:ssa");
         DateFormat military = new SimpleDateFormat("HH:mm:ss");
+        date.setTimeZone(this.timezone);
         normal.setTimeZone(this.timezone);
         military.setTimeZone(this.timezone);
 

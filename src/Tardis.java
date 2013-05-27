@@ -36,18 +36,22 @@ public class Tardis extends Applet implements Runnable{
         add(controls, BorderLayout.NORTH);
 
         Label userTimeZone = new Label (" Your time zone: " + TimeZone.getDefault().getDisplayName() + " | " + TimeZone.getDefault().getID());
-        userTimeZone.setForeground(Color.gray);
+        userTimeZone.setForeground(Color.decode("#EEEEEE"));
         add(userTimeZone, BorderLayout.SOUTH);
 
         Button info = new Button("?");
         controls.add(info, BorderLayout.EAST);
 
         getCountries();
+        getCities();
+        getCity();
 
         comboRegion.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
                 getCities();
+                comboLocation.select(0);
+                getCity();
             }
         });
 
@@ -64,13 +68,13 @@ public class Tardis extends Applet implements Runnable{
             animator = new Thread(this);
             animator.start();
         }
-    }
+    } // End of start
 
     public void stop() {
         if (animator != null) {
             animator = null;
         }
-    }
+    } // End of Stop
 
     public void run() {
         while(animator.isAlive()) {
@@ -83,7 +87,7 @@ public class Tardis extends Applet implements Runnable{
 
             try {Thread.sleep(250);} catch (InterruptedException e) {}
         }
-    }
+    } // End of run
 
     public void paint(Graphics g) {
         // No more fuzzy text! Anti-aliasing on!
@@ -112,8 +116,7 @@ public class Tardis extends Applet implements Runnable{
         g2.drawString(normalTime, 10, 180);
         g2.setColor(Color.GRAY);
         g2.drawString(militaryTime,10,210);
-
-    }
+    } // End of paint
 
     public void readDatabase() {
         URL database = this.getClass().getResource("Database.csv");
@@ -154,7 +157,6 @@ public class Tardis extends Applet implements Runnable{
     } // End of readDatabase()
 
     public void getCountries() {
-        comboRegion.add("Select a region!");
         ArrayList<String> addedCountries = new ArrayList<String>();
         for (City s : cities) {
             if(!addedCountries.contains(s.getCountry())) {
@@ -166,7 +168,6 @@ public class Tardis extends Applet implements Runnable{
 
     public void getCities() {
         comboLocation.removeAll();
-        comboLocation.add("");
         for (City s : cities)
             if (s.getCountry().equals(comboRegion.getSelectedItem()))
                 comboLocation.add(s.getName());
